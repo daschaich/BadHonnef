@@ -153,15 +153,9 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
 
 
 // -----------------------------------------------------------------
-// Compute the magnetization M = Sum_x phi_x
+// Compute the magnetization density m = (Sum_x phi_x) / V
 double calcMag(int N, double *phi) {
-  int i;
-  double M = 0.0;
-
-  // Loop over all sites
-  for (i = 0; i < N; i++)
-    M += phi[i];
-
-  return M;
+  // TODO: To be implemented
+  return -99.0;
 }
 // -----------------------------------------------------------------

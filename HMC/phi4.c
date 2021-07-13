@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
 
     // Avoid unnecessary re-calculation of unchanged magnetization
     if (accept == 1 || i == 0)
-      m = calcMag(info.N, phi) / info.N;
+      m = calcMag(info.N, phi);
 
     printf("MAG %.6g\n", m);
   }
