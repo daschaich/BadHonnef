@@ -1,0 +1,14 @@
+#!/bin/bash
+
+dim=3
+length=6
+kappa=0.185825
+lambda=1.1689
+xi=0.1931833
+ntraj=5000
+traj_length=1
+nstep=20
+seed=42
+
+./phi4 D${dim} L${length} k${kappa} l${lambda} X0        N${ntraj} t${traj_length} s${nstep} r${seed}
+#./phi4 D${dim} L${length} k${kappa} l${lambda} X1 x${xi} N${ntraj} t${traj_length} s${nstep} r${seed}

@@ -10,7 +10,7 @@ all: $(PROGS)
 
 DEPS = phi4.h ranlxd.h
 
-OBJ = ranlxd.o utils.o hmc.o measure.o phi4.o
+OBJ = ranlxd.o utils.o phi4.o
 
 .c.o: phi4.h
 	$(CC) $(OPT) -c $*.c
