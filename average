@@ -1,0 +1,37 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+# ------------------------------------------------------------------
+# This script averages the data (one value per line) in the
+# input data file.  It prints the average and standard error
+#
+# Last modified 28 September 2011 by David Schaich
+
+die "Usage: $0 <file>\n"
+  if (@ARGV != 1);
+
+my $file = shift;
+open IN, "< $file" or die "Error opening $file ($!)\n";
+my @in = <IN>;
+close IN;
+
+my $count = 0;
+my $ave = 0;
+my $err = 0;
+for my $line (@in) {
+  chomp($line);  # Strip any linebreaks
+  $count++;
+  $ave += $line;
+  $err += $line**2;
+}
+
+# Average and print
+if ($count > 1) {
+  $ave /= $count;
+  $err /= $count;
+  $err -= $ave**2;
+  $err = sqrt($err / ($count - 1));    # Standard error
+  printf "%d points: %.6g +/- %.4g\n", $count, $ave, $err;
+}
+exit(0);
+# ------------------------------------------------------------------

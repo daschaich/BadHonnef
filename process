@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <file>"
+  exit 1
+fi
+
+FILE=$1
+
+ACC=$[`grep ACCEPT $FILE -c`]
+TOT=$[`grep delta $FILE -c`]
+echo $ACC | awk -v T=$TOT '{print "Acceptance rate", $1/T}'
+
+grep delta $FILE | awk '{print $4 * $4}' > TEMP
+./average TEMP | awk '{print "RMS DeltaS =", sqrt($3)}'
+rm TEMP
+
+grep EXP $FILE | awk '{print $2}' > TEMP
+./average TEMP | awk '{print "<exp[-DeltaS]> =", $3, $5}'
+rm TEMP
+
+grep MAG $FILE | awk '{print $2}' > TEMP
+./average TEMP | awk '{print "<m> =", $3, $5}'
+rm TEMP
+
+grep MAG $FILE | awk '{print $2 * $2}' > TEMP
+./average TEMP | awk '{print "<m^2> =", $3, $5}'
+rm TEMP
+
+grep MAG $FILE | awk '{print $2 * $2 * $2 * $2}' > TEMP
+./average TEMP | awk '{print "<m^4> =", $3, $5}'
+rm TEMP
