@@ -49,18 +49,14 @@ void updateMom(params_t info, double eps, double *phi, int **hop,
 
 
 // -----------------------------------------------------------------
-// Single step of Verlet integrator
-void verlet(params_t info, double *phi, int **hop, double *mom) {
-  // TODO: To be implemented
-}
-// -----------------------------------------------------------------
-
-
-
-// -----------------------------------------------------------------
-// Single step of Omelyan integrator
-void omelyan(params_t info, double *phi, int **hop, double *mom) {
-  // TODO: To be implemented
+// Single step of MD integrator
+void step(params_t info, double *phi, int **hop, double *mom) {
+  if (info.X == 0) {                    // Verlet
+    // TODO: To be implemented
+  }
+  else {                                // Omelyan
+    // TODO: To be implemented
+  }
 }
 // -----------------------------------------------------------------
 
@@ -113,15 +109,9 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
   // Calculate initial action
   S = calcAct(info, phi, hop, mom);
 
-  // Calculate MD trajectory using specified algorithm
-  if (info.X == 0) {
-    for (i = 0; i < info.nstep; i++)
-      verlet(info, newPhi, hop, newMom);
-  }
-  else {
-    for (i = 0; i < info.nstep; i++)
-      omelyan(info, newPhi, hop, newMom);
-  }
+  // Calculate MD trajectory
+  for (i = 0; i < info.nstep; i++)
+    step(info, newPhi, hop, newMom);
 
   // Accept / reject test
   delta = calcDelta(info, phi, newPhi, hop, mom, newMom);

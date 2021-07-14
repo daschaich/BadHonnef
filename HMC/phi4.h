@@ -14,7 +14,7 @@
 
 
 // -----------------------------------------------------------------
-// Struct params_t holds program parameters
+// Program parameters
 typedef struct {
   int D;            // Number of dimensions
   int L;            // Length of lattice in each dimension

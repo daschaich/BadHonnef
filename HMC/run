@@ -10,5 +10,5 @@ traj_length=1
 nstep=20
 seed=42
 
-./phi4 D${dim} L${length} k${kappa} l${lambda} X0        N${ntraj} t${traj_length} s${nstep} r${seed}
-#./phi4 D${dim} L${length} k${kappa} l${lambda} X1 x${xi} N${ntraj} t${traj_length} s${nstep} r${seed}
+./phi4 D$dim L$length k$kappa l$lambda X0      N$ntraj t$traj_length s$nstep r$seed
+#./phi4 D$dim L$length k$kappa l$lambda X1 x$xi N$ntraj t$traj_length s$nstep r$seed

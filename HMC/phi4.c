@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
   // Start timer
   dtime = -1.0 * (double)clock();
 
-  // Allocate memory for fields, neighbors list, measurements
+  // Allocate memory for fields and neighbors list
   phi = malloc(sizeof *phi * info.N);
   mom = malloc(sizeof *mom * info.N);
   hop = malloc(info.N * sizeof(int *));
