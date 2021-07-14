@@ -1,0 +1,12 @@
+#!/bin/bash
+
+length=2
+time=8
+beta=16.0
+kappa=0.25
+g=0.5
+r=0.1
+resid=1e-8
+seed=42
+
+./graphene L${length} t${time} B${beta} k$kappa g$g R$r r$resid S$seed

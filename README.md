@@ -23,9 +23,14 @@ Once the tests are passed, we can compute more interesting things:
 * Estimate the auto-correlation time of the magnetization across the critical line
 * Experiment as curiosity drives you ([hep-lat/9806012](https://arxiv.org/abs/hep-lat/9806012) might provide inspiration)
 
-## Conjugate gradient [pending]
+## Conjugate gradient
 The goal is to write a conjugate gradient (CG) algorithm to invert a lattice fermion operator.  Since lattice fermions are trickier than scalar field theories, a more complete framework is provided for those who don't have an existing codebase they would prefer to work with.
 
-The provided code considers the tight-binding hamiltonian of graphene on the spatial honeycomb lattice.  It is not suitable for serious research, in part because the fermion operator is implemented as a full matrix rather than a function efficiently implementing the matrix--vector operation.  On the other hand, this may make the CG implementation more transparent.
+The provided code considers the tight-binding hamiltonian of graphene on the spatial honeycomb lattice.  It is not suitable for serious research, in part because the fermion operator is implemented as a full matrix rather than a function carrying out the matrix--vector operation.  On the other hand, this may make the CG implementation more transparent.
 
 Note that this template code needs LAPACK in order to handle more than two spatial sites (`L=1`).
+
+While the CG implementation is the only coding task here, there are various experiments to do once it is in place (optionally using the model solution to appear):
+* Monitor the residual as a function of iteration number
+* Check how the convergence changes for different stopping conditions (`resid` in `run`)
+* Check how the convergence changes for different `L` or `Nt` (the setup time increases rapidly for larger `L`)

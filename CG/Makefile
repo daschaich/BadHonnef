@@ -13,7 +13,7 @@ all: $(PROGS)
 
 DEPS = graphene.h ranlxd.h
 
-OBJ = ranlxd.o utils.o hmc.o graphene.o
+OBJ = ranlxd.o utils.o graphene.o
 
 .c.o: graphene.h
 	$(CC) $(OPT) -c $*.c

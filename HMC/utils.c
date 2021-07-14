@@ -93,7 +93,7 @@ double calcDelta(params_t info, double *phi, double *newPhi, int **hop,
 // Return 1 if accepted, 0 if rejected
 int hmc(params_t info, double *phi, int **hop, double *mom) {
   int i, accept;
-  double S, delta, rand;
+  double S, delta, rand, td;
 
   // Momentum heat bath
   initMom(info.N, mom);
@@ -115,8 +115,9 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
 
   // Accept / reject test
   delta = calcDelta(info, phi, newPhi, hop, mom, newMom);
+  td = exp(-delta);
   ranlxd(&rand, 1);
-  if (delta < 0 || exp(-delta) > rand) {
+  if (delta < 0 || td > rand) {
     printf("ACCEPT: ");
     accept = 1;
     for (i = 0; i < info.N; i++)
@@ -127,7 +128,7 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
     printf("REJECT: ");
   }
   printf("delta = %.6g start = %.6g end = %.6g\n", delta, S, S + delta);
-  printf("EXP %.6g\n", exp(-delta));
+  printf("EXP %.6g\n", td);
 
 #ifdef REVERSE
   // Optionally check reversibility
