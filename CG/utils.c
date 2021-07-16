@@ -33,12 +33,11 @@ void CG(params_t info, double *phi, complex **D, complex *in,
   int i, j, k, N = info.N, m = 2 * info.L * info.L;
   double alpha, beta, denom, gbt = info.beta * info.g / info.t;
   double rsq = 0.0, newRsq = 0.0;
-  complex *res, *newRes, *vec, **DDdag;
+  complex tc, *res, *vec, **DDdag;
 
   // Allocations and initializations
   res = malloc(sizeof *res * N);
   vec = malloc(sizeof *vec * N);
-  newRes = malloc(sizeof *newRes * N);
   DDdag = malloc(N * sizeof(complex *));
   for (i = 0; i < N; i++) {
     DDdag[i] = malloc(N * sizeof(complex));
@@ -77,7 +76,6 @@ void CG(params_t info, double *phi, complex **D, complex *in,
   }
   free(vec);
   free(res);
-  free(newRes);
   free(DDdag);
 }
 // -----------------------------------------------------------------
