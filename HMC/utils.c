@@ -11,18 +11,25 @@ static double twopi = 6.2831847307179586;
 // -----------------------------------------------------------------
 // Fill momentum field with normally distributed random numbers
 void initMom(int N, double *mom) {
-  // TODO: To be implemented
+  int i;
+  double x, rootLog;
 
-  // Here is a sample conversion from uniform to gaussian random numbers
-#if 0
-  double u[2], rootLog, g[2];
-  ranlxd(u, 2);
+  ranlxd(mom, N);
 
-  rootLog = sqrt(-2.0 * log(1.0 - u[0]));
-  g[0] = rootLog * cos(twopi * u[1]);
-  g[1] = rootLog * sin(twopi * u[1]);
-  printf("%.6g, %.6g\n", g[0], g[1]);
-#endif
+  // Convert from uniform to gaussian random numbers, by pairs
+  for (i = 0; i < N - 1; i += 2) {
+    x = mom[i + 1];
+    rootLog = sqrt(-2.0 * log(1.0 - mom[i]));
+    mom[i] = rootLog * cos(twopi * x);
+    mom[i + 1] = rootLog * sin(twopi * x);
+  }
+
+  // Handle case of odd number of sites
+  if (N % 2 == 1) {
+    ranlxd(&x, 1);
+    rootLog = sqrt(-2.0 * log(1.0 - mom[N - 1]));
+    mom[N - 1] = rootLog * cos(twopi * x);
+  }
 }
 // -----------------------------------------------------------------
 
@@ -31,7 +38,8 @@ void initMom(int N, double *mom) {
 // -----------------------------------------------------------------
 // Update the phi field by step epsilon
 void updatePhi(int N, double eps, double *phi, double *mom) {
-  // TODO: To be implemented
+  for (int i = 0; i < N; i++)
+    phi[i] += eps * mom[i];
 }
 // -----------------------------------------------------------------
 
@@ -42,7 +50,19 @@ void updatePhi(int N, double eps, double *phi, double *mom) {
 void updateMom(params_t info, double eps, double *phi, int **hop,
                double *mom) {
 
-  // TODO: To be implemented
+  int i, mu;
+  double phiCubed = 0, F = 0;
+
+  for (i = 0; i < info.N; i++) {
+    // Calculate force term for each site
+    phiCubed = phi[i] * phi[i] * phi[i];
+    F = 2.0 * phi[i] + 4.0 * info.la * (phiCubed - phi[i]);
+    for (mu = 0; mu < info.D; mu++)
+      F -= 2.0 * info.ka * (phi[hop[i][mu]] + phi[hop[i][info.D + mu]]);
+
+    // Actually calculated -F above; subtract to fix sign
+    mom[i] -= eps * F;
+  }
 }
 // -----------------------------------------------------------------
 
@@ -51,11 +71,19 @@ void updateMom(params_t info, double eps, double *phi, int **hop,
 // -----------------------------------------------------------------
 // Single step of MD integrator
 void step(params_t info, double *phi, int **hop, double *mom) {
+  double eps = info.tlength / info.nstep;
+
   if (info.X == 0) {                    // Verlet
-    // TODO: To be implemented
+    updatePhi(info.N, 0.5 * eps, phi, mom);
+    updateMom(info, eps, phi, hop, mom);
+    updatePhi(info.N, 0.5 * eps, phi, mom);
   }
   else {                                // Omelyan
-    // TODO: To be implemented
+    updatePhi(info.N, info.xi * eps, phi, mom);
+    updateMom(info, 0.5 * eps, phi, hop, mom);
+    updatePhi(info.N, eps * (1.0 - 2.0 * info.xi), phi, mom);
+    updateMom(info, 0.5 * eps, phi, hop, mom);
+    updatePhi(info.N, info.xi * eps, phi, mom);
   }
 }
 // -----------------------------------------------------------------
@@ -67,8 +95,26 @@ void step(params_t info, double *phi, int **hop, double *mom) {
 //    S = Sum_x [ pi_x^2 / 2 + phi_x^2 + la * (phi_x^2 - 1)^2
 //                - 2 ka * Sum_mu phi_x phi_{x + mu} ]
 double calcAct(params_t info, double *phi, int **hop, double *mom) {
-  // TODO: To be implemented
-  return -99.0;
+  int i, mu;
+  double S = 0.0, phiSq, td;
+
+  // Loop over all sites
+  for (i = 0; i < info.N; i++) {
+    // Momentum term
+    S += 0.5 * mom[i] * mom[i];
+
+    // Kinetic term, with td = Sum_mu phi_{x + mu}
+    td = phi[hop[i][0]];
+    for (mu = 1; mu < info.D; mu++)
+      td += phi[hop[i][mu]];
+
+    S -= 2.0 * info.ka * phi[i] * td;
+
+    // Mass and self-interaction term
+    phiSq = phi[i] * phi[i];
+    S += phiSq + info.la * (phiSq - 1.0) * (phiSq - 1.0);
+  }
+  return S;
 }
 // -----------------------------------------------------------------
 
@@ -81,8 +127,31 @@ double calcAct(params_t info, double *phi, int **hop, double *mom) {
 double calcDelta(params_t info, double *phi, double *newPhi, int **hop,
                  double *mom, double *newMom) {
 
-  // TODO: To be implemented
-  return 99.0;
+  int i, mu;
+  double delta = 0.0;
+  double td, new_td, phiSq, newPhiSq;
+
+  // Calculate the change in energy at each site
+  for (i = 0; i < info.N; i++) {
+    // Momentum term
+    delta += 0.5 * (newMom[i] * newMom[i] - mom[i] * mom[i]);
+
+    // Kinetic term
+    td = phi[hop[i][0]];
+    new_td = newPhi[hop[i][0]];
+    for (mu = 1; mu < info.D; mu++) {
+      td += phi[hop[i][mu]];
+      new_td += newPhi[hop[i][mu]];
+    }
+    delta -= 2.0 * info.ka * (newPhi[i] * new_td - phi[i] * td);
+
+    // Mass and self-interaction term
+    phiSq = phi[i] * phi[i];
+    newPhiSq = newPhi[i] * newPhi[i];
+    td = (newPhiSq - 1.0) * (newPhiSq - 1.0) - (phiSq - 1.0) * (phiSq - 1.0);
+    delta += newPhiSq - phiSq + info.la * td;
+  }
+  return delta;
 }
 // -----------------------------------------------------------------
 
@@ -132,7 +201,16 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
 
 #ifdef REVERSE
   // Optionally check reversibility
-  // TODO: To be implemented
+  for (i = 0; i < info.N; i++)
+    newMom[i] = -1.0 * newMom[i];
+
+  for (i = 0; i < info.nstep; i++)
+    step(info, newPhi, hop, newMom);
+
+  // For simple test, take difference of total action
+  td = calcAct(info, newPhi, hop, newMom);
+  printf("REVERSED: delta = %.16g start = %.16g end = %.16g\n",
+         td - S, S, td);
 #endif
 
   free(newPhi);
@@ -146,7 +224,13 @@ int hmc(params_t info, double *phi, int **hop, double *mom) {
 // -----------------------------------------------------------------
 // Compute the magnetization density m = (Sum_x phi_x) / V
 double calcMag(int N, double *phi) {
-  // TODO: To be implemented
-  return -99.0;
+  int i;
+  double M = 0.0;
+
+  // Loop over all sites
+  for (i = 0; i < N; i++)
+    M += phi[i];
+
+  return (M / (double)N);
 }
 // -----------------------------------------------------------------

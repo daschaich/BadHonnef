@@ -59,7 +59,41 @@ void CG(params_t info, double *phi, complex **D, complex *in,
 
   // Will exit on convergence or warn if all N iterations exhausted
   for (k = 0; k < N; k++) {
-    // TODO: To be implemented
+    // Update out and get new residual using current residual
+    rsq = 0;
+    denom = 0;
+    for (i = 0; i < N; i++) {
+      rsq += res[i] * conj(res[i]);
+      for (j = 0; j < N; j++)
+        denom += conj(vec[i]) * DDdag[i][j] * vec[j];
+    }
+    alpha = rsq / denom;
+    for (i = 0; i < N; i++) {
+      out[i] += alpha * vec[i];
+      tc = DDdag[i][0] * vec[0];
+      for (j = 1; j < N; j++)
+        tc += DDdag[i][j] * vec[j];
+
+      res[i] -= alpha * tc;
+    }
+
+    // Exit if new residual is small enough
+    newRsq = res[0] * conj(res[0]);;
+    for (i = 1; i < N; i++)
+      newRsq += res[i] * conj(res[i]);
+    if (newRsq < info.res * info.res) {
+      printf("CG converged with rsq = %g ", newRsq);
+      printf("after %d iterations\n", k + 1);
+      break;
+    }
+
+    // Update vec using new residual
+    beta = newRsq / rsq;
+    printf("beta%d: %g = %g / %g\n", k + 1, beta, newRsq, rsq);
+    for (i = 0; i < N; i++) {
+      vec[i] *= beta;
+      vec[i] += res[i];
+    }
   }
 
   // Warn if Krylov subspace should cover full dimensionality
